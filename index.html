@@ -8,14 +8,18 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f0c29;
+      color: white;
     }
     .opcion-btn {
       background-color: #14213d;
       color: white;
       border: 2px solid #fca311;
+      transition: transform 0.2s;
     }
     .opcion-btn:hover {
       background-color: #1f2a48;
+      transform: scale(1.05);
     }
     .correcta {
       background-color: #2a9d8f !important;
@@ -42,17 +46,31 @@
     #btnActivarSonido:hover {
       background-color: #d18e00;
     }
+    .container {
+      max-width: 400px; /* Ajustado para dispositivos móviles */
+      margin: auto;
+      padding: 20px;
+      background-color: #1b1b2f;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .text-yellow-400 {
+      font-size: 1.5rem; /* Tamaño de fuente ajustado */
+    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
   <!-- Audio -->
   <audio id="musicaFondo" src="song.mp3" autoplay loop muted></audio>
 
-  <div id="app" class="w-full max-w-md bg-[#1b1b2f] rounded-2xl p-6 shadow-2xl text-white">
+  <div id="app" class="container">
     <!-- Pantalla de inicio -->
     <div id="inicio" class="space-y-4 animate-fade-in">
-      <h1 class="text-2xl font-bold text-center text-yellow-400">¿Quién quiere ser millonario? - Cálculo</h1>
+      <h1 class="text-3xl font-bold text-yellow-400">¿Quién quiere ser millonario? - Cálculo</h1>
       <input type="text" id="nombre" placeholder="Ingresa tu nombre" class="w-full px-4 py-2 border rounded-xl text-black" />
       <button id="btnIniciar" class="w-full bg-yellow-500 text-black py-2 rounded-xl hover:bg-yellow-600 transition">Comenzar</button>
     </div>
@@ -61,15 +79,15 @@
     <div id="juego" class="hidden space-y-4 animate-fade-in">
       <div class="text-center">
         <h2 id="usuario" class="text-lg font-semibold"></h2>
-        <p id="dinero" class="text-yellow-400 font-bold">Dinero: $0</p>
+        <p id="dinero" class="text-yellow-400 font-bold">Dinero: $0 COP</p>
       </div>
       <div>
         <p id="pregunta" class="font-medium"></p>
         <div id="opciones" class="space-y-2 mt-2"></div>
       </div>
       <div class="flex justify-between gap-2 mt-4">
-        <button id="btnPista" class="flex-1 bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition">Pista</button>
-        <button id="btnDoble" class="flex-1 bg-green-500 text-white py-2 rounded-xl hover:bg-green-600 transition">Doble oportunidad</button>
+        <button id="btnPista50" class="flex-1 bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition">50/50</button>
+        <button id="btnPistaAmigo" class="flex-1 bg-green-500 text-white py-2 rounded-xl hover:bg-green-600 transition">Llamada a un amigo</button>
       </div>
     </div>
 
@@ -87,8 +105,8 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("btnIniciar").addEventListener("click", iniciarJuego);
-      document.getElementById("btnPista").addEventListener("click", usarPista);
-      document.getElementById("btnDoble").addEventListener("click", usarDobleOportunidad);
+      document.getElementById("btnPista50").addEventListener("click", usarPista50);
+      document.getElementById("btnPistaAmigo").addEventListener("click", usarPistaAmigo);
 
       const musica = document.getElementById("musicaFondo");
       musica.volume = 0.4;
@@ -110,7 +128,7 @@
       });
     });
 
-    // Código del juego - Preguntas, lógica y botones (igual que antes)
+    // Código del juego - Preguntas, lógica y botones
     const preguntas = [
       {
         texto: "¿Cuál es el gradiente de f(x, y) = x^2 + y^2?",
@@ -142,8 +160,8 @@
     let nombreUsuario = "";
     let dinero = 0;
     let indicePregunta = 0;
-    let dobleOportunidad = false;
-    let pistaUsada = false;
+    let pistaUsada50 = false;
+    let pistaUsadaAmigo = false;
     let respondido = false;
 
     function iniciarJuego() {
@@ -164,7 +182,6 @@
       }
 
       respondido = false;
-      pistaUsada = false;
       const pregunta = preguntas[indicePregunta];
       document.getElementById("pregunta").textContent = pregunta.texto;
 
@@ -192,9 +209,9 @@
       botones.forEach(b => b.disabled = true);
 
       if (i === pregunta.correcta) {
-        dinero += 100;
+        dinero += 100000; // Incremento en pesos colombianos
         boton.classList.add("correcta");
-        document.getElementById("dinero").textContent = `Dinero: $${dinero}`;
+        document.getElementById("dinero").textContent = `Dinero: $${dinero} COP`;
         correctoAudio.play();
         setTimeout(() => {
           indicePregunta++;
@@ -203,23 +220,15 @@
       } else {
         boton.classList.add("incorrecta");
         incorrectoAudio.play();
-        if (dobleOportunidad) {
-          dobleOportunidad = false;
-          respondido = false;
-          botones.forEach((b, idx) => {
-            if (idx !== i) b.disabled = false;
-          });
-        } else {
-          setTimeout(() => {
-            indicePregunta++;
-            mostrarPregunta();
-          }, 1200);
-        }
+        setTimeout(() => {
+          indicePregunta++;
+          mostrarPregunta();
+        }, 1200);
       }
     }
 
-    function usarPista() {
-      if (pistaUsada) return alert("Ya usaste la pista para esta pregunta.");
+    function usarPista50() {
+      if (pistaUsada50) return alert("Ya usaste la pista 50/50 para esta pregunta.");
 
       const pregunta = preguntas[indicePregunta];
       let opciones = [...Array(pregunta.opciones.length).keys()].filter(i => i !== pregunta.correcta);
@@ -228,18 +237,23 @@
       const botones = document.querySelectorAll('#opciones button');
       eliminar.forEach(i => botones[i].classList.add("opacity-30", "pointer-events-none"));
 
-      pistaUsada = true;
+      pistaUsada50 = true;
     }
 
-    function usarDobleOportunidad() {
-      dobleOportunidad = true;
-      alert("¡Doble oportunidad activada! Si fallas, tendrás otra chance.");
+    function usarPistaAmigo() {
+      if (pistaUsadaAmigo) return alert("Ya usaste la pista 'Llamada a un amigo' para esta pregunta.");
+
+      const pregunta = preguntas[indicePregunta];
+      const respuestaCorrecta = pregunta.opciones[pregunta.correcta];
+      alert(`Tu amigo dice que la respuesta correcta es: ${respuestaCorrecta}`);
+
+      pistaUsadaAmigo = true;
     }
 
     function terminarJuego() {
       document.getElementById("juego").classList.add("hidden");
       document.getElementById("final").classList.remove("hidden");
-      document.getElementById("resultado").textContent = `${nombreUsuario}, ganaste un total de $${dinero}`;
+      document.getElementById("resultado").textContent = `${nombreUsuario}, ganaste un total de $${dinero} COP`;
     }
   </script>
 
