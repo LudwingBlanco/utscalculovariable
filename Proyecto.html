@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Millonario Cálculo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .opcion-btn {
+      background-color: #14213d;
+      color: white;
+      border: 2px solid #fca311;
+    }
+    .opcion-btn:hover {
+      background-color: #1f2a48;
+    }
+    .correcta {
+      background-color: #2a9d8f !important;
+      color: white;
+    }
+    .incorrecta {
+      background-color: #e63946 !important;
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] min-h-screen flex items-center justify-center p-4">
+  <audio id="musicaFondo" src="https://ia601602.us.archive.org/27/items/quien-quiere-ser-millonario-music/Intro%20Who%20Wants%20to%20Be%20a%20Millionaire%20%28HQ%29.mp3" autoplay loop></audio>
+  <audio id="sonidoCorrecto" src="https://assets.mixkit.co/sfx/download/mixkit-correct-answer-reward-952.wav"></audio>
+  <audio id="sonidoIncorrecto" src="https://assets.mixkit.co/sfx/download/mixkit-wrong-answer-fail-notification-946.wav"></audio>
+
+  <div id="app" class="w-full max-w-md bg-[#1b1b2f] rounded-2xl p-6 shadow-2xl text-white">
+    <!-- Pantalla de inicio -->
+    <div id="inicio" class="space-y-4 animate-fade-in">
+      <h1 class="text-2xl font-bold text-center text-yellow-400">¿Quién quiere ser millonario? - Cálculo</h1>
+      <input type="text" id="nombre" placeholder="Ingresa tu nombre" class="w-full px-4 py-2 border rounded-xl text-black" />
+      <button id="btnIniciar" class="w-full bg-yellow-500 text-black py-2 rounded-xl hover:bg-yellow-600 transition">Comenzar</button>
+    </div>
+
+    <!-- Pantalla del juego -->
+    <div id="juego" class="hidden space-y-4 animate-fade-in">
+      <div class="text-center">
+        <h2 id="usuario" class="text-lg font-semibold"></h2>
+        <p id="dinero" class="text-yellow-400 font-bold">Dinero: $0</p>
+      </div>
+      <div>
+        <p id="pregunta" class="font-medium"></p>
+        <div id="opciones" class="space-y-2 mt-2"></div>
+      </div>
+      <div class="flex justify-between gap-2 mt-4">
+        <button id="btnPista" class="flex-1 bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition">Pista</button>
+        <button id="btnDoble" class="flex-1 bg-green-500 text-white py-2 rounded-xl hover:bg-green-600 transition">Doble oportunidad</button>
+      </div>
+    </div>
+
+    <!-- Pantalla final -->
+    <div id="final" class="hidden text-center space-y-4 animate-fade-in">
+      <h2 class="text-xl font-bold text-yellow-400">¡Juego terminado!</h2>
+      <p id="resultado" class="text-lg"></p>
+      <button onclick="location.reload()" class="bg-yellow-500 text-black py-2 px-4 rounded-xl hover:bg-yellow-600 transition">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("btnIniciar").addEventListener("click", iniciarJuego);
+      document.getElementById("btnPista").addEventListener("click", usarPista);
+      document.getElementById("btnDoble").addEventListener("click", usarDobleOportunidad);
+    });
+
+    const preguntas = [
+      {
+        texto: "¿Cuál es el gradiente de f(x, y) = x^2 + y^2?",
+        opciones: ["(2x, 2y)", "(x, y)", "(x^2, y^2)", "(0, 0)"],
+        correcta: 0,
+      },
+      {
+        texto: "¿Qué representa una derivada parcial?",
+        opciones: [
+          "La derivada de una función con todas sus variables",
+          "La derivada respecto a una variable manteniendo las otras constantes",
+          "Una integral múltiple",
+          "El límite hacia cero de una función"
+        ],
+        correcta: 1,
+      },
+      {
+        texto: "¿Qué es un punto crítico?",
+        opciones: [
+          "Donde el gradiente no existe",
+          "Donde el gradiente es máximo",
+          "Donde el gradiente es cero",
+          "Donde la función tiene su mayor valor"
+        ],
+        correcta: 2,
+      }
+    ];
+
+    let nombreUsuario = "";
+    let dinero = 0;
+    let indicePregunta = 0;
+    let dobleOportunidad = false;
+    let pistaUsada = false;
+
+    function iniciarJuego() {
+      const nombreInput = document.getElementById("nombre").value.trim();
+      if (!nombreInput) return alert("Por favor ingresa tu nombre");
+      nombreUsuario = nombreInput;
+
+      document.getElementById("inicio").classList.add("hidden");
+      document.getElementById("juego").classList.remove("hidden");
+      document.getElementById("usuario").textContent = `Jugador: ${nombreUsuario}`;
+      mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+      if (indicePregunta >= preguntas.length) {
+        terminarJuego();
+        return;
+      }
+
+      pistaUsada = false;
+      const pregunta = preguntas[indicePregunta];
+      document.getElementById("pregunta").textContent = pregunta.texto;
+
+      const contenedorOpciones = document.getElementById("opciones");
+      contenedorOpciones.innerHTML = "";
+
+      pregunta.opciones.forEach((opcion, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = opcion;
+        btn.className = "w-full opcion-btn py-2 px-4 rounded-xl transition";
+        btn.addEventListener("click", () => verificarRespuesta(i, btn));
+        contenedorOpciones.appendChild(btn);
+      });
+    }
+
+    function verificarRespuesta(i, boton) {
+      const pregunta = preguntas[indicePregunta];
+      const botones = document.querySelectorAll('#opciones button');
+      const correctoAudio = document.getElementById("sonidoCorrecto");
+      const incorrectoAudio = document.getElementById("sonidoIncorrecto");
+
+      botones.forEach(b => b.disabled = true);
+
+      if (i === pregunta.correcta) {
+        dinero += 100;
+        boton.classList.add("correcta");
+        document.getElementById("dinero").textContent = `Dinero: $${dinero}`;
+        correctoAudio.play();
+        setTimeout(() => {
+          indicePregunta++;
+          mostrarPregunta();
+        }, 1200);
+      } else {
+        boton.classList.add("incorrecta");
+        incorrectoAudio.play();
+        if (dobleOportunidad) {
+          dobleOportunidad = false;
+          botones.forEach((b, idx) => {
+            if (idx !== i) b.disabled = false;
+          });
+        } else {
+          setTimeout(() => {
+            indicePregunta++;
+            mostrarPregunta();
+          }, 1200);
+        }
+      }
+    }
+
+    function usarPista() {
+      if (pistaUsada) return alert("Ya usaste la pista para esta pregunta.");
+
+      const pregunta = preguntas[indicePregunta];
+      let opciones = [...Array(pregunta.opciones.length).keys()].filter(i => i !== pregunta.correcta);
+      let eliminar = opciones.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+      const botones = document.querySelectorAll('#opciones button');
+      eliminar.forEach(i => botones[i].classList.add("opacity-30", "pointer-events-none"));
+
+      pistaUsada = true;
+    }
+
+    function usarDobleOportunidad() {
+      dobleOportunidad = true;
+      alert("¡Doble oportunidad activada! Si fallas, tendrás otra chance.");
+    }
+
+    function terminarJuego() {
+      document.getElementById("juego").classList.add("hidden");
+      document.getElementById("final").classList.remove("hidden");
+      document.getElementById("resultado").textContent = `${nombreUsuario}, ganaste un total de $${dinero}`;
+    }
+  </script>
+  <style>
+    @keyframes fade-in {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.5s ease-out;
+    }
+  </style>
+</body>
+</html>
