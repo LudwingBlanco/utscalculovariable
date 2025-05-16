@@ -103,30 +103,36 @@
   <button id="btnActivarSonido" style="display:none;">Activar Sonido 🔊</button>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("btnIniciar").addEventListener("click", iniciarJuego);
-      document.getElementById("btnPista50").addEventListener("click", usarPista50);
-      document.getElementById("btnPistaAmigo").addEventListener("click", usarPistaAmigo);
+    // Verificar si el juego ya ha sido jugado
+    if (localStorage.getItem('juegoJugado')) {
+      alert("Ya has jugado una vez. No puedes jugar de nuevo.");
+      document.body.innerHTML = "<h1 class='text-center text-yellow-400'>Juego ya completado</h1>";
+    } else {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btnIniciar").addEventListener("click", iniciarJuego);
+        document.getElementById("btnPista50").addEventListener("click", usarPista50);
+        document.getElementById("btnPistaAmigo").addEventListener("click", usarPistaAmigo);
 
-      const musica = document.getElementById("musicaFondo");
-      musica.volume = 0.4;
+        const musica = document.getElementById("musicaFondo");
+        musica.volume = 0.4;
 
-      const playPromise = musica.play();
+        const playPromise = musica.play();
 
-      playPromise.then(() => {
-        // Sonido se reproduce sin problemas
-        document.getElementById("btnActivarSonido").style.display = "none";
-      }).catch(() => {
-        // Autoplay bloqueado, mostrar botón para activar sonido manualmente
-        const btnSonido = document.getElementById("btnActivarSonido");
-        btnSonido.style.display = "block";
-        btnSonido.addEventListener("click", () => {
-          musica.muted = false;
-          musica.play();
-          btnSonido.style.display = "none";
+        playPromise.then(() => {
+          // Sonido se reproduce sin problemas
+          document.getElementById("btnActivarSonido").style.display = "none";
+        }).catch(() => {
+          // Autoplay bloqueado, mostrar botón para activar sonido manualmente
+          const btnSonido = document.getElementById("btnActivarSonido");
+          btnSonido.style.display = "block";
+          btnSonido.addEventListener("click", () => {
+            musica.muted = false;
+            musica.play();
+            btnSonido.style.display = "none";
+          });
         });
       });
-    });
+    }
 
     // Código del juego - Preguntas, lógica y botones
     const preguntas = [
@@ -168,6 +174,9 @@
       const nombreInput = document.getElementById("nombre").value.trim();
       if (!nombreInput) return alert("Por favor ingresa tu nombre");
       nombreUsuario = nombreInput;
+
+      // Marcar el juego como jugado
+      localStorage.setItem('juegoJugado', 'true');
 
       document.getElementById("inicio").classList.add("hidden");
       document.getElementById("juego").classList.remove("hidden");
