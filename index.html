@@ -104,6 +104,7 @@
     let indicePregunta = 0;
     let dobleOportunidad = false;
     let pistaUsada = false;
+    let respondido = false;
 
     function iniciarJuego() {
       const nombreInput = document.getElementById("nombre").value.trim();
@@ -122,6 +123,7 @@
         return;
       }
 
+      respondido = false;
       pistaUsada = false;
       const pregunta = preguntas[indicePregunta];
       document.getElementById("pregunta").textContent = pregunta.texto;
@@ -139,6 +141,9 @@
     }
 
     function verificarRespuesta(i, boton) {
+      if (respondido) return;
+      respondido = true;
+
       const pregunta = preguntas[indicePregunta];
       const botones = document.querySelectorAll('#opciones button');
       const correctoAudio = document.getElementById("sonidoCorrecto");
@@ -160,6 +165,7 @@
         incorrectoAudio.play();
         if (dobleOportunidad) {
           dobleOportunidad = false;
+          respondido = false;
           botones.forEach((b, idx) => {
             if (idx !== i) b.disabled = false;
           });
