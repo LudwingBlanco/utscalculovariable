@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Millonario Cálculo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -25,12 +25,29 @@
       background-color: #e63946 !important;
       color: white;
     }
+    #btnActivarSonido {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #fca311;
+      color: black;
+      padding: 10px 20px;
+      border-radius: 9999px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 9999;
+      transition: background-color 0.3s ease;
+    }
+    #btnActivarSonido:hover {
+      background-color: #d18e00;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] min-h-screen flex items-center justify-center p-4">
-  <audio id="musicaFondo" src="https://ia601602.us.archive.org/27/items/quien-quiere-ser-millonario-music/Intro%20Who%20Wants%20to%20Be%20a%20Millionaire%20%28HQ%29.mp3" autoplay loop></audio>
-  <audio id="sonidoCorrecto" src="https://assets.mixkit.co/sfx/download/mixkit-correct-answer-reward-952.wav"></audio>
-  <audio id="sonidoIncorrecto" src="https://assets.mixkit.co/sfx/download/mixkit-wrong-answer-fail-notification-946.wav"></audio>
+
+  <!-- Audio -->
+  <audio id="musicaFondo" src="song.mp3" autoplay loop muted></audio>
 
   <div id="app" class="w-full max-w-md bg-[#1b1b2f] rounded-2xl p-6 shadow-2xl text-white">
     <!-- Pantalla de inicio -->
@@ -64,13 +81,36 @@
     </div>
   </div>
 
+  <!-- Botón para activar sonido si autoplay está bloqueado -->
+  <button id="btnActivarSonido" style="display:none;">Activar Sonido 🔊</button>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("btnIniciar").addEventListener("click", iniciarJuego);
       document.getElementById("btnPista").addEventListener("click", usarPista);
       document.getElementById("btnDoble").addEventListener("click", usarDobleOportunidad);
+
+      const musica = document.getElementById("musicaFondo");
+      musica.volume = 0.4;
+
+      const playPromise = musica.play();
+
+      playPromise.then(() => {
+        // Sonido se reproduce sin problemas
+        document.getElementById("btnActivarSonido").style.display = "none";
+      }).catch(() => {
+        // Autoplay bloqueado, mostrar botón para activar sonido manualmente
+        const btnSonido = document.getElementById("btnActivarSonido");
+        btnSonido.style.display = "block";
+        btnSonido.addEventListener("click", () => {
+          musica.muted = false;
+          musica.play();
+          btnSonido.style.display = "none";
+        });
+      });
     });
 
+    // Código del juego - Preguntas, lógica y botones (igual que antes)
     const preguntas = [
       {
         texto: "¿Cuál es el gradiente de f(x, y) = x^2 + y^2?",
@@ -146,8 +186,8 @@
 
       const pregunta = preguntas[indicePregunta];
       const botones = document.querySelectorAll('#opciones button');
-      const correctoAudio = document.getElementById("sonidoCorrecto");
-      const incorrectoAudio = document.getElementById("sonidoIncorrecto");
+      const correctoAudio = new Audio('https://assets.mixkit.co/sfx/download/mixkit-correct-answer-reward-952.wav');
+      const incorrectoAudio = new Audio('https://assets.mixkit.co/sfx/download/mixkit-wrong-answer-fail-notification-946.wav');
 
       botones.forEach(b => b.disabled = true);
 
@@ -202,6 +242,7 @@
       document.getElementById("resultado").textContent = `${nombreUsuario}, ganaste un total de $${dinero}`;
     }
   </script>
+
   <style>
     @keyframes fade-in {
       from { opacity: 0; transform: scale(0.98); }
