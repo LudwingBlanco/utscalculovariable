@@ -47,7 +47,7 @@
       background-color: #d18e00;
     }
     .container {
-      max-width: 400px; /* Ajustado para dispositivos móviles */
+      max-width: 400px;
       margin: auto;
       padding: 20px;
       background-color: #1b1b2f;
@@ -58,31 +58,28 @@
       text-align: center;
     }
     .text-yellow-400 {
-      font-size: 1.5rem; /* Tamaño de fuente ajustado */
+      font-size: 1.5rem;
     }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-  <!-- Audio -->
   <audio id="musicaFondo" src="song.mp3" autoplay loop muted></audio>
 
   <div id="app" class="container">
-    <!-- Pantalla de inicio -->
     <div id="inicio" class="space-y-4 animate-fade-in">
       <h1 class="text-3xl font-bold text-yellow-400">¿Quién quiere ser millonario? - Cálculo</h1>
       <input type="text" id="nombre" placeholder="Ingresa tu nombre" class="w-full px-4 py-2 border rounded-xl text-black" />
       <button id="btnIniciar" class="w-full bg-yellow-500 text-black py-2 rounded-xl hover:bg-yellow-600 transition">Comenzar</button>
     </div>
 
-    <!-- Pantalla del juego -->
     <div id="juego" class="hidden space-y-4 animate-fade-in">
       <div class="text-center">
         <h2 id="usuario" class="text-lg font-semibold"></h2>
         <p id="dinero" class="text-yellow-400 font-bold">Dinero: $0 COP</p>
       </div>
       <div>
-        <p id="pregunta" class="font-medium"></p>
+        <img id="pregunta" class="w-full rounded-lg" src="" alt="Pregunta" />
         <div id="opciones" class="space-y-2 mt-2"></div>
       </div>
       <div class="flex justify-between gap-2 mt-4">
@@ -91,7 +88,6 @@
       </div>
     </div>
 
-    <!-- Pantalla final -->
     <div id="final" class="hidden text-center space-y-4 animate-fade-in">
       <h2 class="text-xl font-bold text-yellow-400">¡Juego terminado!</h2>
       <p id="resultado" class="text-lg"></p>
@@ -99,11 +95,9 @@
     </div>
   </div>
 
-  <!-- Botón para activar sonido si autoplay está bloqueado -->
   <button id="btnActivarSonido" style="display:none;">Activar Sonido 🔊</button>
 
   <script>
-    // Verificar si el juego ya ha sido jugado
     if (localStorage.getItem('juegoJugado')) {
       alert("Ya has jugado una vez. No puedes jugar de nuevo.");
       document.body.innerHTML = "<h1 class='text-center text-yellow-400'>Juego ya completado</h1>";
@@ -119,10 +113,8 @@
         const playPromise = musica.play();
 
         playPromise.then(() => {
-          // Sonido se reproduce sin problemas
           document.getElementById("btnActivarSonido").style.display = "none";
         }).catch(() => {
-          // Autoplay bloqueado, mostrar botón para activar sonido manualmente
           const btnSonido = document.getElementById("btnActivarSonido");
           btnSonido.style.display = "block";
           btnSonido.addEventListener("click", () => {
@@ -134,32 +126,66 @@
       });
     }
 
-    // Código del juego - Preguntas, lógica y botones
     const preguntas = [
       {
-        texto: "¿Cuál es el gradiente de f(x, y) = x^2 + y^2?",
-        opciones: ["(2x, 2y)", "(x, y)", "(x^2, y^2)", "(0, 0)"],
-        correcta: 0,
+        preguntaImg: "p1.png",
+        opciones: [
+          "A) D⃗ᵤf(2,1) = 2 + 6√3",
+          "B) D⃗ᵤf(2,1) = 5 - √2",
+          "C) D⃗ᵤf(2,1) = 4 + 2√5",
+          "D) D⃗ᵤf(2,1) = √2 + 3"
+        ],
+        correcta: 0
       },
       {
-        texto: "¿Qué representa una derivada parcial?",
+        preguntaImg: "p2.png",
         opciones: [
-          "La derivada de una función con todas sus variables",
-          "La derivada respecto a una variable manteniendo las otras constantes",
-          "Una integral múltiple",
-          "El límite hacia cero de una función"
+          "A) D⃗ᵤf(6,−2) = −2√2",
+          "B) D⃗ᵤf(6,−2) = −4/√10",
+          "C) D⃗ᵤf(6,−2) = √2",
+          "D) D⃗ᵤf(6,−2) = 5/2"
         ],
-        correcta: 1,
+        correcta: 1
       },
       {
-        texto: "¿Qué es un punto crítico?",
+        preguntaImg: "p3.png",
         opciones: [
-          "Donde el gradiente no existe",
-          "Donde el gradiente es máximo",
-          "Donde el gradiente es cero",
-          "Donde la función tiene su mayor valor"
+          "A) D⃗ᵤf(x,y) = x√2 + y",
+          "B) D⃗ᵤf(x,y) = √2(x + y)",
+          "C) D⃗ᵤf(x,y) = 2xy",
+          "D) D⃗ᵤf(x,y) = x² + y²"
         ],
-        correcta: 2,
+        correcta: 1
+      },
+      {
+        preguntaImg: "p4.png",
+        opciones: [
+          "A) D⃗ᵤf(x,y) = (√5x − 4y)/(3x + y)",
+          "B) D⃗ᵤf(x,y) = (5√3/4 + 1) · 1/√(5x − 4y)",
+          "C) D⃗ᵤf(x,y) = x³y/2",
+          "D) D⃗ᵤf(x,y) = ln(5x − 4y)"
+        ],
+        correcta: 1
+      },
+      {
+        preguntaImg: "p5.png",
+        opciones: [
+          "A) ∇f(1,1) = (6, 3)",
+          "B) ∇f(1,1) = (2, 5)",
+          "C) ∇f(1,1) = (−1, 1)",
+          "D) ∇f(1,1) = (3, 6)"
+        ],
+        correcta: 0
+      },
+      {
+        preguntaImg: "p6.png",
+        opciones: [
+          "A) ∇f(1,2,2) = (4, 3, −5)",
+          "B) ∇f(1,2,2) = (0, −2, −3)",
+          "C) ∇f(1,2,2) = (−12, −1, −16)",
+          "D) ∇f(1,2,2) = (2, −2, 1)"
+        ],
+        correcta: 2
       }
     ];
 
@@ -175,7 +201,6 @@
       if (!nombreInput) return alert("Por favor ingresa tu nombre");
       nombreUsuario = nombreInput;
 
-      // Marcar el juego como jugado
       localStorage.setItem('juegoJugado', 'true');
 
       document.getElementById("inicio").classList.add("hidden");
@@ -192,7 +217,7 @@
 
       respondido = false;
       const pregunta = preguntas[indicePregunta];
-      document.getElementById("pregunta").textContent = pregunta.texto;
+      document.getElementById("pregunta").src = pregunta.preguntaImg;
 
       const contenedorOpciones = document.getElementById("opciones");
       contenedorOpciones.innerHTML = "";
@@ -206,7 +231,7 @@
       });
     }
 
-    function verificarRespuesta(i, boton) {
+    function verificarRespuesta(i, btn) {
       if (respondido) return;
       respondido = true;
 
@@ -218,8 +243,8 @@
       botones.forEach(b => b.disabled = true);
 
       if (i === pregunta.correcta) {
-        dinero += 100000; // Incremento en pesos colombianos
-        boton.classList.add("correcta");
+        dinero += 100000;
+        btn.classList.add("correcta");
         document.getElementById("dinero").textContent = `Dinero: $${dinero} COP`;
         correctoAudio.play();
         setTimeout(() => {
@@ -227,7 +252,7 @@
           mostrarPregunta();
         }, 1200);
       } else {
-        boton.classList.add("incorrecta");
+        btn.classList.add("incorrecta");
         incorrectoAudio.play();
         setTimeout(() => {
           indicePregunta++;
@@ -238,24 +263,13 @@
 
     function usarPista50() {
       if (pistaUsada50) return alert("Ya usaste la pista 50/50 para esta pregunta.");
-
-      const pregunta = preguntas[indicePregunta];
-      let opciones = [...Array(pregunta.opciones.length).keys()].filter(i => i !== pregunta.correcta);
-      let eliminar = opciones.sort(() => 0.5 - Math.random()).slice(0, 2);
-
-      const botones = document.querySelectorAll('#opciones button');
-      eliminar.forEach(i => botones[i].classList.add("opacity-30", "pointer-events-none"));
-
+      alert("Elimina dos respuestas incorrectas (simulado)");
       pistaUsada50 = true;
     }
 
     function usarPistaAmigo() {
       if (pistaUsadaAmigo) return alert("Ya usaste la pista 'Llamada a un amigo' para esta pregunta.");
-
-      const pregunta = preguntas[indicePregunta];
-      const respuestaCorrecta = pregunta.opciones[pregunta.correcta];
-      alert(`Tu amigo dice que la respuesta correcta es: ${respuestaCorrecta}`);
-
+      alert("Tu amigo dice que la respuesta correcta es la primera opción.");
       pistaUsadaAmigo = true;
     }
 
